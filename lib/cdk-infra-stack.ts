@@ -1,4 +1,5 @@
 import {
+    App,
     CfnCondition,
     CfnOutput,
     CfnParameter,
@@ -71,7 +72,7 @@ export interface FhirWorksStackProps extends StackProps {
 export default class FhirWorksStack extends Stack {
     javaHapiValidator: JavaHapiValidator | undefined;
 
-    constructor(scope: Construct, id: string, props?: FhirWorksStackProps) {
+    constructor(scope: App, id: string, props?: FhirWorksStackProps) {
         super(scope, id, props);
 
         // Define parameters
