@@ -9,6 +9,11 @@ import {
 import { NagSuppressions } from 'cdk-nag';
 import { Construct } from 'constructs';
 
+type CognitoResourcesOptions = {
+    cognitoOAuthDefaultRedirectURL: string;
+    overrideUserPool?: UserPool;
+};
+
 export default class CognitoResources {
     userPool: UserPool;
 
@@ -22,30 +27,33 @@ export default class CognitoResources {
 
     auditorUserGroup: CfnUserPoolGroup;
 
-    constructor(scope: Construct, stackName: string, cognitoOAuthDefaultRedirectURL: string) {
-        this.userPool = new UserPool(scope, 'userPool', {
-            accountRecovery: AccountRecovery.EMAIL_ONLY,
-            autoVerify: {
-                email: true,
-            },
-            userPoolName: stackName,
-            standardAttributes: {
-                email: {
-                    required: true,
+    constructor(scope: Construct, stackName: string, options: CognitoResourcesOptions) {
+        const { cognitoOAuthDefaultRedirectURL, overrideUserPool } = options;
+        this.userPool =
+            overrideUserPool ??
+            new UserPool(scope, 'userPool', {
+                accountRecovery: AccountRecovery.EMAIL_ONLY,
+                autoVerify: {
+                    email: true,
                 },
-            },
-            customAttributes: {
-                cc_confirmed: new StringAttribute({ mutable: true }),
-                tenantId: new StringAttribute({ mutable: true }),
-            },
-            passwordPolicy: {
-                requireDigits: true,
-                requireLowercase: true,
-                requireSymbols: true,
-                requireUppercase: true,
-            },
-            selfSignUpEnabled: false,
-        });
+                userPoolName: stackName,
+                standardAttributes: {
+                    email: {
+                        required: true,
+                    },
+                },
+                customAttributes: {
+                    cc_confirmed: new StringAttribute({ mutable: true }),
+                    tenantId: new StringAttribute({ mutable: true }),
+                },
+                passwordPolicy: {
+                    requireDigits: true,
+                    requireLowercase: true,
+                    requireSymbols: true,
+                    requireUppercase: true,
+                },
+                selfSignUpEnabled: false,
+            });
         NagSuppressions.addResourceSuppressions(this.userPool, [
             {
                 id: 'AwsSolutions-COG2',

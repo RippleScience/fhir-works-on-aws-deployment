@@ -42,6 +42,7 @@ import { LogGroup } from 'aws-cdk-lib/aws-logs';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import path from 'path';
 import { NagSuppressions } from 'cdk-nag';
+import { UserPool } from 'aws-cdk-lib/aws-cognito';
 import KMSResources from './kms';
 import ElasticSearchResources from './elasticsearch';
 import SubscriptionsResources from './subscriptions';
@@ -63,6 +64,7 @@ export interface FhirWorksStackProps extends StackProps {
     logLevel: string;
     oauthRedirect: string;
     fhirVersion: string;
+    overrideUserPool?: UserPool;
 }
 
 export default class FhirWorksStack extends Stack {
@@ -266,7 +268,10 @@ export default class FhirWorksStack extends Stack {
         const subscriptionsResources = new SubscriptionsResources(this, props!.region, this.partition, props!.stage);
 
         // Create Cognito Resources here:
-        const cognitoResources = new CognitoResources(this, this.stackName, props!.oauthRedirect);
+        const cognitoResources = new CognitoResources(this, this.stackName, {
+            cognitoOAuthDefaultRedirectURL: props!.oauthRedirect,
+            overrideUserPool: props!.overrideUserPool,
+        });
 
         const apiGatewayLogGroup = new LogGroup(this, 'apiGatewayLogGroup', {
             encryptionKey: kmsResources.logKMSKey,
