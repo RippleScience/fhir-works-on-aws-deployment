@@ -64,6 +64,7 @@ export interface FhirWorksStackProps extends StackProps {
     logLevel: string;
     oauthRedirect: string;
     fhirVersion: string;
+    overrideApiGateway?: RestApi;
     overrideUserPool?: UserPool;
 }
 
@@ -278,23 +279,27 @@ export default class FhirWorksStack extends Stack {
             logGroupName: `/aws/api-gateway/fhir-service-${props!.stage}`,
         });
 
-        const apiGatewayRestApi = new RestApi(this, 'apiGatewayRestApi', {
-            apiKeySourceType: ApiKeySourceType.HEADER,
-            restApiName: `${props!.stage}-fhir-service`,
-            endpointConfiguration: {
-                types: [EndpointType.EDGE],
-            },
-            deployOptions: {
-                stageName: props!.stage,
-                tracingEnabled: true,
-                loggingLevel:
-                    props!.logLevel === MethodLoggingLevel.ERROR ? MethodLoggingLevel.ERROR : MethodLoggingLevel.INFO,
-                accessLogFormat: AccessLogFormat.custom(
-                    '{"authorizer.claims.sub":"$context.authorizer.claims.sub","error.message":"$context.error.message","extendedRequestId":"$context.extendedRequestId","httpMethod":"$context.httpMethod","identity.sourceIp":"$context.identity.sourceIp","integration.error":"$context.integration.error","integration.integrationStatus":"$context.integration.integrationStatus","integration.latency":"$context.integration.latency","integration.requestId":"$context.integration.requestId","integration.status":"$context.integration.status","path":"$context.path","requestId":"$context.requestId","responseLatency":"$context.responseLatency","responseLength":"$context.responseLength","stage":"$context.stage","status":"$context.status"}',
-                ),
-                accessLogDestination: new LogGroupLogDestination(apiGatewayLogGroup),
-            },
-        });
+        const apiGatewayRestApi =
+            props!.overrideApiGateway ??
+            new RestApi(this, 'apiGatewayRestApi', {
+                apiKeySourceType: ApiKeySourceType.HEADER,
+                restApiName: `${props!.stage}-fhir-service`,
+                endpointConfiguration: {
+                    types: [EndpointType.EDGE],
+                },
+                deployOptions: {
+                    stageName: props!.stage,
+                    tracingEnabled: true,
+                    loggingLevel:
+                        props!.logLevel === MethodLoggingLevel.ERROR
+                            ? MethodLoggingLevel.ERROR
+                            : MethodLoggingLevel.INFO,
+                    accessLogFormat: AccessLogFormat.custom(
+                        '{"authorizer.claims.sub":"$context.authorizer.claims.sub","error.message":"$context.error.message","extendedRequestId":"$context.extendedRequestId","httpMethod":"$context.httpMethod","identity.sourceIp":"$context.identity.sourceIp","integration.error":"$context.integration.error","integration.integrationStatus":"$context.integration.integrationStatus","integration.latency":"$context.integration.latency","integration.requestId":"$context.integration.requestId","integration.status":"$context.integration.status","path":"$context.path","requestId":"$context.requestId","responseLatency":"$context.responseLatency","responseLength":"$context.responseLength","stage":"$context.stage","status":"$context.status"}',
+                    ),
+                    accessLogDestination: new LogGroupLogDestination(apiGatewayLogGroup),
+                },
+            });
         NagSuppressions.addResourceSuppressions(apiGatewayRestApi, [
             {
                 id: 'AwsSolutions-APIG2',
