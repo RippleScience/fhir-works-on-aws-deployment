@@ -90,7 +90,7 @@ export const getFhirConfig = async (): Promise<FhirConfig> => {
     return {
         configVersion: 1.0,
         productInfo: {
-            orgName: 'Organization Name',
+            orgName: 'Ripple Science',
         },
         auth: {
             authorization: authService,
@@ -139,13 +139,11 @@ export const getFhirConfig = async (): Promise<FhirConfig> => {
                 },
             },
         },
-        multiTenancyConfig: enableMultiTenancy
-            ? {
-                  enableMultiTenancy: true,
-                  useTenantSpecificUrl: true,
-                  tenantIdClaimPath: 'custom:tenantId',
-              }
-            : undefined,
+        multiTenancyConfig: {
+            enableMultiTenancy: true,
+            useTenantSpecificUrl: false,
+            tenantIdClaimPath: 'custom:customerId',
+        },
     };
 };
 
