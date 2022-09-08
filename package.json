@@ -17,6 +17,11 @@
   "bin": {
     "cdk-infra": "bin/cdk-infra.js"
   },
+  "exports": {
+    ".": {
+      "import": "./lib/cdk-infra-stack.ts"
+    }
+  },
   "license": "Apache-2.0",
   "scripts": {
     "lint": "eslint . --ext .ts,.tsx",
