@@ -3,7 +3,7 @@
   "version": "5.0.0",
   "description": "FHIR Works on AWS deployment",
   "stackname": "fhir-works-on-aws-deployment",
-  "main": "src/index.ts",
+  "main": "lib/cdk-infra-stack.ts",
   "author": {
     "name": "Amazon Web Services",
     "email": "fhir-works-on-aws-dev@amazon.com",
