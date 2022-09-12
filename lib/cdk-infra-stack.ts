@@ -358,6 +358,8 @@ export default class FhirWorksStack extends Stack {
             },
         };
 
+        const scriptsPath = path.resolve(__dirname, '..', 'scripts');
+
         const startExportJobLambdaFunction = new NodejsFunction(this, 'startExportJobLambdaFunction', {
             ...defaultBulkExportLambdaProps,
             handler: 'startExportJobHandler',
@@ -379,6 +381,7 @@ export default class FhirWorksStack extends Stack {
             role: bulkExportResources.updateStatusLambdaRole,
         });
 
+        const bulkExportPath = path.resolve(__dirname, '..', 'bulkExport');
         const uploadGlueScriptsLambdaFunction = new NodejsFunction(this, 'uploadGlueScriptsLambdaFunction', {
             timeout: Duration.seconds(30),
             memorySize: 192,
@@ -386,7 +389,7 @@ export default class FhirWorksStack extends Stack {
             role: bulkExportResources.uploadGlueScriptsLambdaRole,
             description: 'Upload glue scripts to s3',
             handler: 'handler',
-            entry: path.join(__dirname, '../bulkExport/uploadGlueScriptsToS3.ts'),
+            entry: path.join(bulkExportPath, 'uploadGlueScriptsToS3.ts'),
             bundling: {
                 ...defaultLambdaBundlingOptions,
                 commandHooks: {
@@ -402,10 +405,10 @@ export default class FhirWorksStack extends Stack {
                         // copy all the necessary files for the lambda into the bundle
                         // this allows the lambda functions for bulk export to have access to these files within the lambda instance
                         return [
-                            `node scripts/build_lambda.js ${inputDir} ${outputDir} bulkExport/glueScripts/export-script.py`,
-                            `node scripts/build_lambda.js ${inputDir} ${outputDir} bulkExport/schema/transitiveReferenceParams.json`,
-                            `node scripts/build_lambda.js ${inputDir} ${outputDir} bulkExport/schema/${PATIENT_COMPARTMENT_V3}`,
-                            `node scripts/build_lambda.js ${inputDir} ${outputDir} bulkExport/schema/${PATIENT_COMPARTMENT_V4}`,
+                            `node ${scriptsPath}/build_lambda.js ${inputDir} ${outputDir} ${bulkExportPath}/glueScripts/export-script.py`,
+                            `node ${scriptsPath}/build_lambda.js ${inputDir} ${outputDir} ${bulkExportPath}/schema/transitiveReferenceParams.json`,
+                            `node ${scriptsPath}/build_lambda.js ${inputDir} ${outputDir} ${bulkExportPath}/schema/${PATIENT_COMPARTMENT_V3}`,
+                            `node ${scriptsPath}/build_lambda.js ${inputDir} ${outputDir} ${bulkExportPath}/schema/${PATIENT_COMPARTMENT_V4}`,
                         ];
                     },
                 },
@@ -568,7 +571,7 @@ export default class FhirWorksStack extends Stack {
                         // copy all the necessary files for the lambda into the bundle
                         // this allows the validators to be constructed with the compiled implementation guides
                         return [
-                            `node scripts/build_lambda.js ${inputDir}/compiledImplementationGuides ${outputDir}/compiledImplementationGuides none true`,
+                            `node ${scriptsPath}/build_lambda.js ${inputDir}/compiledImplementationGuides ${outputDir}/compiledImplementationGuides none true`,
                         ];
                     },
                 },
