@@ -306,16 +306,19 @@ export default class FhirWorksStack extends Stack {
                 reason: 'Requests to the API Gateway are validated by the Lambda',
             },
         ]);
-        NagSuppressions.addResourceSuppressionsByPath(
-            this,
-            `/fhir-service-${props!.stage}/apiGatewayRestApi/DeploymentStage.${props!.stage}/Resource`,
-            [
-                {
-                    id: 'AwsSolutions-APIG3',
-                    reason: 'Access is configured to be limited by a Usage Plan and API Key',
-                },
-            ],
-        );
+
+        if (!props?.overrideApiGateway) {
+            NagSuppressions.addResourceSuppressionsByPath(
+                this,
+                `/fhir-service-${props!.stage}/apiGatewayRestApi/DeploymentStage.${props!.stage}/Resource`,
+                [
+                    {
+                        id: 'AwsSolutions-APIG3',
+                        reason: 'Access is configured to be limited by a Usage Plan and API Key',
+                    },
+                ],
+            );
+        }
 
         const lambdaDefaultEnvVars = {
             API_URL: `https://${apiGatewayRestApi.restApiId}.execute-api.${props!.region}.amazonaws.com/${
@@ -721,34 +724,37 @@ export default class FhirWorksStack extends Stack {
                 authorizationType: AuthorizationType.NONE,
                 apiKeyRequired: false,
             });
-        NagSuppressions.addResourceSuppressionsByPath(
-            this,
-            `/fhir-service-${props!.stage}/apiGatewayRestApi/Default/metadata/GET/Resource`,
-            [
-                {
-                    id: 'AwsSolutions-APIG4',
-                    reason: 'The /metadata endpoints do not require Authorization',
-                },
-                {
-                    id: 'AwsSolutions-COG4',
-                    reason: 'The /metadata endpoints do not require an Authorizer',
-                },
-            ],
-        );
-        NagSuppressions.addResourceSuppressionsByPath(
-            this,
-            `/fhir-service-${props!.stage}/apiGatewayRestApi/Default/tenant/{tenantId}/metadata/GET/Resource`,
-            [
-                {
-                    id: 'AwsSolutions-APIG4',
-                    reason: 'The /metadata endpoints do not require Authorization',
-                },
-                {
-                    id: 'AwsSolutions-COG4',
-                    reason: 'The /metadata endpoints do not require an Authorizer',
-                },
-            ],
-        );
+
+        if (!props?.overrideApiGateway) {
+            NagSuppressions.addResourceSuppressionsByPath(
+                this,
+                `/fhir-service-${props!.stage}/apiGatewayRestApi/Default/metadata/GET/Resource`,
+                [
+                    {
+                        id: 'AwsSolutions-APIG4',
+                        reason: 'The /metadata endpoints do not require Authorization',
+                    },
+                    {
+                        id: 'AwsSolutions-COG4',
+                        reason: 'The /metadata endpoints do not require an Authorizer',
+                    },
+                ],
+            );
+            NagSuppressions.addResourceSuppressionsByPath(
+                this,
+                `/fhir-service-${props!.stage}/apiGatewayRestApi/Default/tenant/{tenantId}/metadata/GET/Resource`,
+                [
+                    {
+                        id: 'AwsSolutions-APIG4',
+                        reason: 'The /metadata endpoints do not require Authorization',
+                    },
+                    {
+                        id: 'AwsSolutions-COG4',
+                        reason: 'The /metadata endpoints do not require an Authorizer',
+                    },
+                ],
+            );
+        }
 
         const ddbToEsDLQ = new Queue(this, 'ddbToEsDLQ', {
             retentionPeriod: Duration.days(14),
