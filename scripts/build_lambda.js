@@ -21,6 +21,7 @@ function ensureDirectoryExistence(filePath) {
 if (isDirectory) {
     fse.copySync(inputDir, outputDir);
 } else {
-    ensureDirectoryExistence(`${outputDir}/${fileToMove}`);
-    fs.copyFileSync(`${inputDir}/${fileToMove}`, `${outputDir}/${fileToMove}`);
+    var outFile = path.join(outputDir, path.basename(fileToMove));
+    ensureDirectoryExistence(outFile);
+    fs.copyFileSync(fileToMove, outFile);
 }
