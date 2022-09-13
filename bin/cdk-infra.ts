@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
-import { Aspects } from 'aws-cdk-lib';
+import { Aspects, Stack } from 'aws-cdk-lib';
 import { AwsSolutionsChecks } from 'cdk-nag/lib/packs/aws-solutions';
 import { NagSuppressions } from 'cdk-nag';
+import { Construct } from 'constructs';
 import FhirWorksStack from '../lib/cdk-infra-stack';
 
 // initialize with defaults
@@ -34,27 +35,38 @@ if (!allowedLogLevels.includes(logLevel)) {
     logLevel = 'error';
 }
 
-const stack = new FhirWorksStack(app, `fhir-service-${stage}`, {
-    env: {
-        account: process.env.CDK_DEFAULT_ACCOUNT,
-        region,
-    },
-    tags: {
-        FHIR_SERVICE: `fhir-service-${region}-${stage}`,
-    },
-    stage,
-    region,
-    enableMultiTenancy,
-    enableSubscriptions,
-    useHapiValidator,
-    enableESHardDelete,
-    logLevel,
-    oauthRedirect,
-    enableBackup,
-    fhirVersion,
-    description:
-        '(SO0128) - Solution - Primary Template - This template creates all the necessary resources to deploy FHIR Works on AWS; a framework to deploy a FHIR server on AWS.',
-});
+class RootStack extends Stack {
+    constructor(scope: Construct) {
+        super(scope, `fhir-service-root`, {
+            env: {
+                account: process.env.CDK_DEFAULT_ACCOUNT,
+                region,
+            },
+            tags: {
+                FHIR_SERVICE: `fhir-service-${region}-${stage}`,
+            },
+            description:
+                '(SO0128) - Solution - Primary Template - This template creates all the necessary resources to deploy FHIR Works on AWS; a framework to deploy a FHIR server on AWS.',
+        });
+
+        // eslint-disable-next-line no-new
+        new FhirWorksStack(this, `fhir-service-${stage}`, {
+            stage,
+            region,
+            enableMultiTenancy,
+            enableSubscriptions,
+            useHapiValidator,
+            enableESHardDelete,
+            logLevel,
+            oauthRedirect,
+            enableBackup,
+            fhirVersion,
+        });
+    }
+}
+
+const stack = new RootStack(app);
+
 // run cdk nag
 Aspects.of(app).add(new AwsSolutionsChecks());
 NagSuppressions.addStackSuppressions(stack, [

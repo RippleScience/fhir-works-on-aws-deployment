@@ -1,14 +1,13 @@
 import {
-    App,
     CfnCondition,
     CfnOutput,
     CfnParameter,
     CustomResource,
     Duration,
     Fn,
+    NestedStack,
+    NestedStackProps,
     RemovalPolicy,
-    Stack,
-    StackProps,
 } from 'aws-cdk-lib';
 import {
     ApiKeySourceType,
@@ -43,6 +42,8 @@ import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import path from 'path';
 import { NagSuppressions } from 'cdk-nag';
 import { UserPool } from 'aws-cdk-lib/aws-cognito';
+import { Construct } from 'constructs';
+
 import KMSResources from './kms';
 import ElasticSearchResources from './elasticsearch';
 import SubscriptionsResources from './subscriptions';
@@ -53,7 +54,7 @@ import Backup from './backup';
 import AlarmsResource from './alarms';
 import JavaHapiValidator from './javaHapiValidator';
 
-export interface FhirWorksStackProps extends StackProps {
+export interface FhirWorksStackProps extends NestedStackProps {
     stage: string;
     region: string;
     enableMultiTenancy: boolean;
@@ -68,10 +69,10 @@ export interface FhirWorksStackProps extends StackProps {
     overrideUserPool?: UserPool;
 }
 
-export default class FhirWorksStack extends Stack {
+export default class FhirWorksStack extends NestedStack {
     javaHapiValidator: JavaHapiValidator | undefined;
 
-    constructor(scope: App, id: string, props?: FhirWorksStackProps) {
+    constructor(scope: Construct, id: string, props?: FhirWorksStackProps) {
         super(scope, id, props);
 
         // Define parameters
@@ -310,7 +311,7 @@ export default class FhirWorksStack extends Stack {
         if (!props?.overrideApiGateway) {
             NagSuppressions.addResourceSuppressionsByPath(
                 this,
-                `/fhir-service-${props!.stage}/apiGatewayRestApi/DeploymentStage.${props!.stage}/Resource`,
+                `/fhir-service-root/fhir-service-${props!.stage}/apiGatewayRestApi/DeploymentStage.${props!.stage}/Resource`,
                 [
                     {
                         id: 'AwsSolutions-APIG3',
@@ -734,7 +735,7 @@ export default class FhirWorksStack extends Stack {
         if (!props?.overrideApiGateway) {
             NagSuppressions.addResourceSuppressionsByPath(
                 this,
-                `/fhir-service-${props!.stage}/apiGatewayRestApi/Default/metadata/GET/Resource`,
+                `/fhir-service-root/fhir-service-${props!.stage}/apiGatewayRestApi/Default/metadata/GET/Resource`,
                 [
                     {
                         id: 'AwsSolutions-APIG4',
@@ -748,7 +749,7 @@ export default class FhirWorksStack extends Stack {
             );
             NagSuppressions.addResourceSuppressionsByPath(
                 this,
-                `/fhir-service-${props!.stage}/apiGatewayRestApi/Default/tenant/{tenantId}/metadata/GET/Resource`,
+                `/fhir-service-root/fhir-service-${props!.stage}/apiGatewayRestApi/Default/tenant/{tenantId}/metadata/GET/Resource`,
                 [
                     {
                         id: 'AwsSolutions-APIG4',
