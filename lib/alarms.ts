@@ -174,7 +174,7 @@ export default class AlarmsResource {
         });
         apiGateway5XXErrorAlarm.addOkAction(new SnsAction(fhirWorksAlarmSNSTopic));
         apiGateway5XXErrorAlarm.addAlarmAction(new SnsAction(fhirWorksAlarmSNSTopic));
-        apiGateway5XXErrorAlarm.node.addDependency(apiGatewayRestApi);
+        // apiGateway5XXErrorAlarm.node.addDependency(apiGatewayRestApi);
 
         const apiGateway4XXErrorAlarm = new Alarm(scope, 'apiGateway4XXErrorAlarm', {
             alarmDescription: 'Alarm when API Gateway has more 1 4xx errors; 3 times',
@@ -197,7 +197,7 @@ export default class AlarmsResource {
         });
         apiGateway4XXErrorAlarm.addOkAction(new SnsAction(fhirWorksAlarmSNSTopic));
         apiGateway4XXErrorAlarm.addAlarmAction(new SnsAction(fhirWorksAlarmSNSTopic));
-        apiGateway4XXErrorAlarm.node.addDependency(apiGatewayRestApi);
+        // apiGateway4XXErrorAlarm.node.addDependency(apiGatewayRestApi);
 
         const apiGatewayLatencyAlarm = new Alarm(scope, 'apiGatewayLatencyAlarm', {
             alarmDescription: 'Alarm when API Gatway average latency is more than 3s; 2 times',
@@ -220,7 +220,7 @@ export default class AlarmsResource {
         });
         apiGatewayLatencyAlarm.addOkAction(new SnsAction(fhirWorksAlarmSNSTopic));
         apiGatewayLatencyAlarm.addAlarmAction(new SnsAction(fhirWorksAlarmSNSTopic));
-        apiGatewayLatencyAlarm.node.addDependency(apiGatewayRestApi);
+        // apiGatewayLatencyAlarm.node.addDependency(apiGatewayRestApi);
 
         const clusterStatusRedAlarm = new Alarm(scope, 'clusterStatusRedAlarm', {
             alarmName: `FhirSolution.${stage}.High.FhirESClusterStatusRedAlarm`,
