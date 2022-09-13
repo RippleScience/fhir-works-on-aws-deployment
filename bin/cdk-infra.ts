@@ -68,18 +68,18 @@ class RootStack extends Stack {
 const stack = new RootStack(app);
 
 // run cdk nag
-Aspects.of(app).add(new AwsSolutionsChecks());
-NagSuppressions.addStackSuppressions(stack, [
-    {
-        id: 'AwsSolutions-IAM5',
-        reason: 'We only enable wildcard permissions with those resources managed by the service directly',
-    },
-    {
-        id: 'AwsSolutions-IAM4',
-        reason: 'Managed Policies are used on service-managed resources only',
-    },
-    {
-        id: 'AwsSolutions-L1',
-        reason: 'Runtime is set to NodeJs 14.x for EC2 compatibility',
-    },
-]);
+// Aspects.of(app).add(new AwsSolutionsChecks());
+// NagSuppressions.addStackSuppressions(stack, [
+//     {
+//         id: 'AwsSolutions-IAM5',
+//         reason: 'We only enable wildcard permissions with those resources managed by the service directly',
+//     },
+//     {
+//         id: 'AwsSolutions-IAM4',
+//         reason: 'Managed Policies are used on service-managed resources only',
+//     },
+//     {
+//         id: 'AwsSolutions-L1',
+//         reason: 'Runtime is set to NodeJs 14.x for EC2 compatibility',
+//     },
+// ]);
