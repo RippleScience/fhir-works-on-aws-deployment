@@ -75,7 +75,7 @@ export interface FhirWorksStackProps extends NestedStackProps {
 export default class FhirWorksStack extends NestedStack {
     javaHapiValidator: JavaHapiValidator | undefined;
 
-    methods: Method[];
+    public readonly methods: Method[] = [];
 
     constructor(scope: Construct, id: string, props?: FhirWorksStackProps) {
         super(scope, id, props);
@@ -291,7 +291,7 @@ export default class FhirWorksStack extends NestedStack {
             overrideApi = RestApi.fromRestApiAttributes(this, 'overridedApiGatewayRestApi', props.overrideApiGateway);
         }
 
-        const apiGatewayRestApi =
+        const apiGatewayRestApi: any =
             overrideApi ??
             new RestApi(this, 'apiGatewayRestApi', {
                 apiKeySourceType: ApiKeySourceType.HEADER,

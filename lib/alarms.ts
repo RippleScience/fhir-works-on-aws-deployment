@@ -1,5 +1,5 @@
 import { Duration } from 'aws-cdk-lib';
-import { RestApi } from 'aws-cdk-lib/aws-apigateway';
+import { IRestApi, RestApi } from 'aws-cdk-lib/aws-apigateway';
 import { Alarm, ComparisonOperator, Metric, TreatMissingData } from 'aws-cdk-lib/aws-cloudwatch';
 import { SnsAction } from 'aws-cdk-lib/aws-cloudwatch-actions';
 import { Effect, PolicyDocument, PolicyStatement, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
@@ -18,7 +18,7 @@ export default class AlarmsResource {
         snsKMSKey: Key,
         ddbToEsDLQ: Queue,
         fhirServerLambdaFunction: Function,
-        apiGatewayRestApi: RestApi,
+        apiGatewayRestApi: RestApi | IRestApi,
         stackName: string,
         account: string,
         elasticSearchDomain: Domain,
