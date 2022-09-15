@@ -22,6 +22,7 @@ import {
     RestApiAttributes,
     IRestApi,
     Method,
+    ApiKey,
 } from 'aws-cdk-lib/aws-apigateway';
 import { AttributeType, BillingMode, StreamViewType, Table, TableEncryption } from 'aws-cdk-lib/aws-dynamodb';
 import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
@@ -704,8 +705,9 @@ export default class FhirWorksStack extends NestedStack {
         fhirServerLambda.currentVersion.addAlias(`fhir-server-lambda-${props!.stage}`);
 
         // Overridden API doesn't have access.
+        let apiGatewayApiKey: ApiKey | undefined;
         if (!overrideApi) {
-            const apiGatewayApiKey = apiGatewayRestApi.addApiKey('developerApiKey', {
+            apiGatewayApiKey = apiGatewayRestApi.addApiKey('developerApiKey', {
                 description: 'Key for developer access to the FHIR Api',
                 apiKeyName: `developer-key-${props!.stage}`,
             });
@@ -1134,12 +1136,15 @@ export default class FhirWorksStack extends NestedStack {
             value: `${elasticSearchResources.elasticSearchDomain.domainEndpoint}`,
             exportName: `ElasticSearchDomainEndpoint-${props!.stage}`,
         });
-        // eslint-disable-next-line no-new
-        new CfnOutput(this, 'developerApiKeyOutput', {
-            description: 'Key for developer access to the API',
-            value: `${apiGatewayApiKey}`,
-            exportName: `DeveloperAPIKey-${props!.stage}`,
-        });
+
+        if (apiGatewayApiKey) {
+            // eslint-disable-next-line no-new
+            new CfnOutput(this, 'developerApiKeyOutput', {
+                description: 'Key for developer access to the API',
+                value: `${apiGatewayApiKey}`,
+                exportName: `DeveloperAPIKey-${props!.stage}`,
+            });
+        }
 
         if (isDev) {
             // eslint-disable-next-line no-new
