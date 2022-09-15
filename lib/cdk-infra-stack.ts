@@ -19,6 +19,9 @@ import {
     MethodLoggingLevel,
     AccessLogFormat,
     LogGroupLogDestination,
+    RestApiAttributes,
+    IRestApi,
+    Method,
 } from 'aws-cdk-lib/aws-apigateway';
 import { AttributeType, BillingMode, StreamViewType, Table, TableEncryption } from 'aws-cdk-lib/aws-dynamodb';
 import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
@@ -65,12 +68,14 @@ export interface FhirWorksStackProps extends NestedStackProps {
     logLevel: string;
     oauthRedirect: string;
     fhirVersion: string;
-    overrideApiGateway?: RestApi;
+    overrideApiGateway?: RestApiAttributes;
     overrideUserPool?: UserPool;
 }
 
 export default class FhirWorksStack extends NestedStack {
     javaHapiValidator: JavaHapiValidator | undefined;
+
+    methods: Method[];
 
     constructor(scope: Construct, id: string, props?: FhirWorksStackProps) {
         super(scope, id, props);
@@ -280,8 +285,14 @@ export default class FhirWorksStack extends NestedStack {
             logGroupName: `/aws/api-gateway/fhir-service-${props!.stage}`,
         });
 
+        let overrideApi: IRestApi | undefined;
+
+        if (props?.overrideApiGateway) {
+            overrideApi = RestApi.fromRestApiAttributes(this, 'overridedApiGatewayRestApi', props.overrideApiGateway);
+        }
+
         const apiGatewayRestApi =
-            props!.overrideApiGateway ??
+            overrideApi ??
             new RestApi(this, 'apiGatewayRestApi', {
                 apiKeySourceType: ApiKeySourceType.HEADER,
                 restApiName: `${props!.stage}-fhir-service`,
@@ -308,10 +319,12 @@ export default class FhirWorksStack extends NestedStack {
             },
         ]);
 
-        if (!props?.overrideApiGateway) {
+        if (!overrideApi) {
             NagSuppressions.addResourceSuppressionsByPath(
                 this,
-                `/fhir-service-root/fhir-service-${props!.stage}/apiGatewayRestApi/DeploymentStage.${props!.stage}/Resource`,
+                `/fhir-service-root/fhir-service-${props!.stage}/apiGatewayRestApi/DeploymentStage.${
+                    props!.stage
+                }/Resource`,
                 [
                     {
                         id: 'AwsSolutions-APIG3',
@@ -690,47 +703,53 @@ export default class FhirWorksStack extends NestedStack {
         }
         fhirServerLambda.currentVersion.addAlias(`fhir-server-lambda-${props!.stage}`);
 
-        const apiGatewayApiKey = apiGatewayRestApi.addApiKey('developerApiKey', {
-            description: 'Key for developer access to the FHIR Api',
-            apiKeyName: `developer-key-${props!.stage}`,
-        });
-        apiGatewayRestApi
-            .addUsagePlan('apiUsagePlan', {
-                throttle: {
-                    burstLimit: 100, // maximum API request rate limit over a time ranging from one to a few seconds
-                    rateLimit: 50, // average requests per second over an extended period of time
-                },
-                name: `fhir-service-${props!.stage}`,
-                apiStages: [
-                    {
-                        api: apiGatewayRestApi,
-                        stage: apiGatewayRestApi.deploymentStage,
+        // Overridden API doesn't have access.
+        if (!overrideApi) {
+            const apiGatewayApiKey = apiGatewayRestApi.addApiKey('developerApiKey', {
+                description: 'Key for developer access to the FHIR Api',
+                apiKeyName: `developer-key-${props!.stage}`,
+            });
+            apiGatewayRestApi
+                .addUsagePlan('apiUsagePlan', {
+                    throttle: {
+                        burstLimit: 100, // maximum API request rate limit over a time ranging from one to a few seconds
+                        rateLimit: 50, // average requests per second over an extended period of time
                     },
-                ],
-            })
-            .addApiKey(apiGatewayApiKey);
-        apiGatewayRestApi.root.addMethod('ANY', new LambdaIntegration(fhirServerLambda), {
-            authorizer: apiGatewayAuthorizer,
-            authorizationType: AuthorizationType.COGNITO,
-            apiKeyRequired: true,
-        });
-        apiGatewayRestApi.root.addResource('{proxy+}').addMethod('ANY', new LambdaIntegration(fhirServerLambda), {
-            authorizer: apiGatewayAuthorizer,
-            authorizationType: AuthorizationType.COGNITO,
-            apiKeyRequired: true,
-        });
-        apiGatewayRestApi.root.addResource('metadata').addMethod('GET', new LambdaIntegration(fhirServerLambda), {
-            authorizationType: AuthorizationType.NONE,
-            apiKeyRequired: false,
-        });
-        apiGatewayRestApi.root
-            .addResource('tenant')
-            .addResource('{tenantId}')
-            .addResource('metadata')
-            .addMethod('GET', new LambdaIntegration(fhirServerLambda), {
+                    name: `fhir-service-${props!.stage}`,
+                    apiStages: [
+                        {
+                            api: apiGatewayRestApi,
+                            stage: apiGatewayRestApi.deploymentStage,
+                        },
+                    ],
+                })
+                .addApiKey(apiGatewayApiKey);
+        }
+
+        this.methods.push(
+            apiGatewayRestApi.root.addMethod('ANY', new LambdaIntegration(fhirServerLambda), {
+                authorizer: apiGatewayAuthorizer,
+                authorizationType: AuthorizationType.COGNITO,
+                apiKeyRequired: true,
+            }),
+            apiGatewayRestApi.root.addResource('{proxy+}').addMethod('ANY', new LambdaIntegration(fhirServerLambda), {
+                authorizer: apiGatewayAuthorizer,
+                authorizationType: AuthorizationType.COGNITO,
+                apiKeyRequired: true,
+            }),
+            apiGatewayRestApi.root.addResource('metadata').addMethod('GET', new LambdaIntegration(fhirServerLambda), {
                 authorizationType: AuthorizationType.NONE,
                 apiKeyRequired: false,
-            });
+            }),
+            apiGatewayRestApi.root
+                .addResource('tenant')
+                .addResource('{tenantId}')
+                .addResource('metadata')
+                .addMethod('GET', new LambdaIntegration(fhirServerLambda), {
+                    authorizationType: AuthorizationType.NONE,
+                    apiKeyRequired: false,
+                }),
+        );
 
         if (!props?.overrideApiGateway) {
             NagSuppressions.addResourceSuppressionsByPath(
