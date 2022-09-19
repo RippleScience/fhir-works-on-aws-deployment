@@ -420,10 +420,10 @@ export default class FhirWorksStack extends NestedStack {
                         // copy all the necessary files for the lambda into the bundle
                         // this allows the lambda functions for bulk export to have access to these files within the lambda instance
                         return [
-                            `node ${scriptsPath}/build_lambda.js ${inputDir} ${outputDir}/glueScripts ${bulkExportPath}/glueScripts/export-script.py`,
-                            `node ${scriptsPath}/build_lambda.js ${inputDir} ${outputDir}/schema ${bulkExportPath}/schema/transitiveReferenceParams.json`,
-                            `node ${scriptsPath}/build_lambda.js ${inputDir} ${outputDir}/schema ${bulkExportPath}/schema/${PATIENT_COMPARTMENT_V3}`,
-                            `node ${scriptsPath}/build_lambda.js ${inputDir} ${outputDir}/schema ${bulkExportPath}/schema/${PATIENT_COMPARTMENT_V4}`,
+                            `node ${scriptsPath}/build_lambda.js ${inputDir} ${outputDir}/bulkExport/glueScripts ${bulkExportPath}/glueScripts/export-script.py`,
+                            `node ${scriptsPath}/build_lambda.js ${inputDir} ${outputDir}/bulkExport/schema ${bulkExportPath}/schema/transitiveReferenceParams.json`,
+                            `node ${scriptsPath}/build_lambda.js ${inputDir} ${outputDir}/bulkExport/schema ${bulkExportPath}/schema/${PATIENT_COMPARTMENT_V3}`,
+                            `node ${scriptsPath}/build_lambda.js ${inputDir} ${outputDir}/bulkExport/schema ${bulkExportPath}/schema/${PATIENT_COMPARTMENT_V4}`,
                         ];
                     },
                 },
