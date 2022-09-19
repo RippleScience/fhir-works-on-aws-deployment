@@ -729,11 +729,11 @@ export default class FhirWorksStack extends NestedStack {
         }
 
         this.methods.push(
-            apiGatewayRestApi.root.addMethod('ANY', new LambdaIntegration(fhirServerLambda), {
-                authorizer: apiGatewayAuthorizer,
-                authorizationType: AuthorizationType.COGNITO,
-                apiKeyRequired: true,
-            }),
+            // apiGatewayRestApi.root.addMethod('ANY', new LambdaIntegration(fhirServerLambda), {
+            //     authorizer: apiGatewayAuthorizer,
+            //     authorizationType: AuthorizationType.COGNITO,
+            //     apiKeyRequired: true,
+            // }),
             apiGatewayRestApi.root.addResource('{proxy+}').addMethod('ANY', new LambdaIntegration(fhirServerLambda), {
                 authorizer: apiGatewayAuthorizer,
                 authorizationType: AuthorizationType.COGNITO,
