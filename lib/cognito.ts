@@ -3,6 +3,7 @@ import {
     CfnUserPoolClient,
     CfnUserPoolDomain,
     CfnUserPoolGroup,
+    IUserPool,
     StringAttribute,
     UserPool,
 } from 'aws-cdk-lib/aws-cognito';
@@ -11,11 +12,11 @@ import { Construct } from 'constructs';
 
 type CognitoResourcesOptions = {
     cognitoOAuthDefaultRedirectURL: string;
-    overrideUserPool?: UserPool;
+    overrideUserPoolId?: string;
 };
 
 export default class CognitoResources {
-    userPool: UserPool;
+    userPool: IUserPool;
 
     userPoolClient: CfnUserPoolClient;
 
@@ -28,7 +29,15 @@ export default class CognitoResources {
     auditorUserGroup: CfnUserPoolGroup;
 
     constructor(scope: Construct, stackName: string, options: CognitoResourcesOptions) {
-        const { cognitoOAuthDefaultRedirectURL, overrideUserPool } = options;
+
+        const { cognitoOAuthDefaultRedirectURL, overrideUserPoolId } = options;
+
+        let overrideUserPool: IUserPool | undefined;
+
+        if (overrideUserPoolId) {
+            overrideUserPool = UserPool.fromUserPoolId(scope, 'OVERRIDEPOOL', overrideUserPoolId);
+        }
+
         this.userPool =
             overrideUserPool ??
             new UserPool(scope, 'userPool', {

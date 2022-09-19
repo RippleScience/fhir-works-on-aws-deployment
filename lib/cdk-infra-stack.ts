@@ -70,7 +70,7 @@ export interface FhirWorksStackProps extends NestedStackProps {
     oauthRedirect: string;
     fhirVersion: string;
     overrideApiGateway?: RestApiAttributes;
-    overrideUserPool?: UserPool;
+    overrideUserPoolId?: string;
 }
 
 export default class FhirWorksStack extends NestedStack {
@@ -278,7 +278,7 @@ export default class FhirWorksStack extends NestedStack {
         // Create Cognito Resources here:
         const cognitoResources = new CognitoResources(this, this.stackName, {
             cognitoOAuthDefaultRedirectURL: props!.oauthRedirect,
-            overrideUserPool: props!.overrideUserPool,
+            overrideUserPoolId: props!.overrideUserPoolId,
         });
 
         const apiGatewayLogGroup = new LogGroup(this, 'apiGatewayLogGroup', {
