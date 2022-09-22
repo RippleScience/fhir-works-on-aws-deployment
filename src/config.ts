@@ -142,7 +142,7 @@ export const getFhirConfig = async (): Promise<FhirConfig> => {
         multiTenancyConfig: {
             enableMultiTenancy: true,
             useTenantSpecificUrl: true,
-            tenantIdClaimPath: 'customerId',
+            tenantIdClaimPath: 'custom:customerId',
         },
     };
 };
