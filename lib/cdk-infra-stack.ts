@@ -78,6 +78,8 @@ export default class FhirWorksStack extends NestedStack {
 
     public readonly methods: Method[] = [];
 
+    public readonly lambdaEnvironmentVariables: { [key: string]: string };
+
     constructor(scope: Construct, id: string, props?: FhirWorksStackProps) {
         super(scope, id, props);
 
@@ -355,6 +357,7 @@ export default class FhirWorksStack extends NestedStack {
             ENABLE_SUBSCRIPTIONS: `${props!.enableSubscriptions}`,
             LOG_LEVEL: props!.logLevel,
         };
+        this.lambdaEnvironmentVariables = lambdaDefaultEnvVars;
 
         const defaultLambdaBundlingOptions = {
             target: 'es2020',
