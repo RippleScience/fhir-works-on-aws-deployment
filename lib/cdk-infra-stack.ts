@@ -23,6 +23,7 @@ import {
     IRestApi,
     Method,
     ApiKey,
+    Resource,
 } from 'aws-cdk-lib/aws-apigateway';
 import { AttributeType, BillingMode, StreamViewType, Table, TableEncryption } from 'aws-cdk-lib/aws-dynamodb';
 import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
@@ -731,17 +732,19 @@ export default class FhirWorksStack extends NestedStack {
                 .addApiKey(apiGatewayApiKey);
         }
 
+        const rootProxyResource: Resource = apiGatewayRestApi.root.addResource('{proxy+}');
         this.methods.push(
             // apiGatewayRestApi.root.addMethod('ANY', new LambdaIntegration(fhirServerLambda), {
             //     authorizer: apiGatewayAuthorizer,
             //     authorizationType: AuthorizationType.COGNITO,
             //     apiKeyRequired: true,
             // }),
-            apiGatewayRestApi.root.addResource('{proxy+}').addMethod('ANY', new LambdaIntegration(fhirServerLambda), {
+            rootProxyResource.addMethod('ANY', new LambdaIntegration(fhirServerLambda), {
                 authorizer: apiGatewayAuthorizer,
                 authorizationType: AuthorizationType.COGNITO,
                 apiKeyRequired: true,
             }),
+            rootProxyResource.addCorsPreflight(),
             apiGatewayRestApi.root.addResource('metadata').addMethod('GET', new LambdaIntegration(fhirServerLambda), {
                 authorizationType: AuthorizationType.NONE,
                 apiKeyRequired: false,
