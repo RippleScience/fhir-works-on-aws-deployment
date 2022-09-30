@@ -5,7 +5,14 @@
 
 import serverless from 'serverless-http';
 import { generateServerlessRouter } from 'fhir-works-on-aws-routing';
+import type { CorsOptions } from 'cors';
 import { getFhirConfig, genericResources } from './config';
+
+const corsOptions: CorsOptions = {
+    origin: '*',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    allowedHeaders: ['Content-Type', 'X-Amz-Date', 'Authorization', 'x-api-key'],
+};
 
 export const ensureAsyncInit = async (initPromise: Promise<any>): Promise<void> => {
     try {
@@ -19,7 +26,7 @@ export const ensureAsyncInit = async (initPromise: Promise<any>): Promise<void> 
 };
 
 async function asyncServerless() {
-    return serverless(generateServerlessRouter(await getFhirConfig(), genericResources), {
+    return serverless(generateServerlessRouter(await getFhirConfig(), genericResources, corsOptions), {
         request(request: any, event: any) {
             request.user = event.user;
         },
