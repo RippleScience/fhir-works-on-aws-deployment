@@ -5,7 +5,7 @@
 import { dir, DirectoryResult } from 'tmp-promise';
 import { join } from 'path';
 import { existsSync, mkdirSync, PathLike } from 'fs';
-import { ImplementationGuides } from 'fhir-works-on-aws-interface';
+import { ImplementationGuides } from '@ripplescience/fhir-works-on-aws-interface';
 import { IGCompiler, IGCompilerOptions, loadJson, storeJson } from './IGCompiler';
 
 class MockImplementationGuides implements ImplementationGuides {

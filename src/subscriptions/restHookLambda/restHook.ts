@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { makeLogger } from 'fhir-works-on-aws-interface';
+import { makeLogger } from '@ripplescience/fhir-works-on-aws-interface';
 import { SQSEvent, SQSBatchResponse } from 'aws-lambda';
 import { SubscriptionNotification } from 'fhir-works-on-aws-search-es';
 import { metricScope, Unit } from 'aws-embedded-metrics';

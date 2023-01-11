@@ -6,7 +6,7 @@
 
 import { StreamSubscriptionMatcher } from 'fhir-works-on-aws-search-es';
 
-import { DynamoDb, DynamoDbDataService } from 'fhir-works-on-aws-persistence-ddb';
+import { DynamoDb, DynamoDbDataService } from '@ripplescience/fhir-works-on-aws-persistence-ddb';
 import { fhirVersion } from '../../config';
 import { loadImplementationGuides } from '../../implementationGuides/loadCompiledIGs';
 

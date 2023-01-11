@@ -10,7 +10,7 @@ import {
     BASE_R4_RESOURCES,
     BASE_STU3_RESOURCES,
     Validator,
-} from 'fhir-works-on-aws-interface';
+} from '@ripplescience/fhir-works-on-aws-interface';
 import { ElasticSearchService } from 'fhir-works-on-aws-search-es';
 import { RBACHandler } from 'fhir-works-on-aws-authz-rbac';
 import {
@@ -19,7 +19,7 @@ import {
     DynamoDbBundleService,
     S3DataService,
     DynamoDbUtil,
-} from 'fhir-works-on-aws-persistence-ddb';
+} from '@ripplescience/fhir-works-on-aws-persistence-ddb';
 import JsonSchemaValidator from 'fhir-works-on-aws-routing/lib/router/validation/jsonSchemaValidator';
 import HapiFhirLambdaValidator from 'fhir-works-on-aws-routing/lib/router/validation/hapiFhirLambdaValidator';
 import SubscriptionValidator from 'fhir-works-on-aws-routing/lib/router/validation/subscriptionValidator';
